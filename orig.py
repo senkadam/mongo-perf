@@ -6,8 +6,6 @@ import sys
 import json
 import urllib2
 import os
-import time
-
 
 
 
@@ -42,7 +40,7 @@ def parse_arguments():
                         type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--host', dest='hostname',
                         help='hostname of the mongod/mongos under test',
-                        default='ldsadasdocalhost')
+                        default='localhost')
     parser.add_argument('-p', '--port', dest='port',
                         help='Port of the mongod/mongos under test',
                         default='27017')
@@ -108,7 +106,6 @@ def load_file_in_shell(subproc, file, echo=True):
         print(cmd)
     subproc.stdin.write(cmd)
     line = subproc.stdout.readline().strip()
-    print(line);
     if line != "true":
         raise MongoShellCommandError("unable to load file %s message was %s"
                                      % (file, line))
@@ -153,19 +150,14 @@ def main():
             args.includeFilter = '%'
 
     # Print version info.
-    #call([args.shellpath,"--host", args.hostname,"admin","-u", "root" ,"-p" ,"b90-80FF435_0##2x2","--eval",     "print('db version: ' + db.version());" " db.serverBuildInfo().gitVersion;"])
-    #print("")
+    call([args.shellpath, "--norc", "--port", args.port, "--eval",
+          "print('db version: ' + db.version());"
+          " db.serverBuildInfo().gitVersion;"])
+    print("")
 
 
     # Open a mongo shell subprocess and load necessary files.
-
-    print(args.hostname)
-    
-    #mongo_proc = Popen([args.shellpath], stdin=PIPE, stdout=PIPE)
-    mongo_proc = Popen([args.shellpath,"--norc", "--quiet","--host", args.hostname,"admin","-u", "root" ,"-p" ,"b90-80FF435_0##2x2"], stdin=PIPE, stdout=PIPE)
-    mongo_proc.stdout.readline().strip()
-    mongo_proc.stdout.readline().strip()	
-    time.sleep(1)
+    mongo_proc = Popen([args.shellpath, "--norc", "--quiet", "--port", args.port], stdin=PIPE, stdout=PIPE)
 
     # load test files
     load_file_in_shell(mongo_proc, 'util/utils.js')
@@ -242,4 +234,3 @@ if __name__ == '__main__':
         sys.stderr.write(str(e))
         sys.exit(1)
     sys.exit(0)
-

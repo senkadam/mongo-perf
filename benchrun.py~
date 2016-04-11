@@ -109,7 +109,7 @@ def load_file_in_shell(subproc, file, echo=True):
     subproc.stdin.write(cmd)
     line = subproc.stdout.readline().strip()
     print(line);
-    if line != "true":
+    if line != true:
         raise MongoShellCommandError("unable to load file %s message was %s"
                                      % (file, line))
 
